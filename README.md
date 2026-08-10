@@ -85,12 +85,12 @@ so work isn't lost if browser storage is cleared.
 | Asset | Platform source |
 |-------|-----------------|
 | Why AI Safe Use Matters (video) | Existing |
-| AUP Welcome Survey | New |
+| AUP Welcome Survey | Existing |
 | Your AI Policy at a Glance (employee PDF) | New — download from app |
 | Official Company AUP | New — download from app |
-| AUP Assessment | New |
-| Acknowledgment of Policy | New |
-| AUP Exit Survey | New |
+| AUP Assessment | Custom Questions |
+| Acknowledgment of Policy | Exisiting |
+| AUP Exit Survey | Existing |
 
 ## Architecture
 
