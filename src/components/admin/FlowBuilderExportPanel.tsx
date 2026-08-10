@@ -250,6 +250,27 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
       </Card>
 
       <Card>
+        <h4 className="text-sm font-semibold text-alpine">Welcome video asset</h4>
+        <p className="mt-2 text-xs text-alpine/50">
+          The welcome video is already uploaded once and reused for every
+          client — enter its platform Asset ID so the excel sheet points at
+          the exact asset instead of relying on a title-text match.
+        </p>
+        <label className="mt-4 block text-xs text-alpine/60">
+          Why an AI Acceptable Use Policy Matters — Asset ID
+          <input
+            type="text"
+            value={pdfAssetOverrides.video.assetId ?? ""}
+            onChange={(e) =>
+              updatePdfAssetOverride("video", { assetId: e.target.value })
+            }
+            placeholder="Leave blank to match by title instead"
+            className="mt-1 w-full max-w-xs rounded-card border border-alpine/15 bg-white px-3 py-2 text-sm text-alpine placeholder:text-alpine/40 focus:border-alpine/40 focus:outline-none focus:ring-2 focus:ring-alpine/10"
+          />
+        </label>
+      </Card>
+
+      <Card>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <SectionTitle className="text-xl">Flow Builder export</SectionTitle>

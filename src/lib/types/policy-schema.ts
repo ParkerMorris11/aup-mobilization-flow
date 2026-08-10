@@ -129,13 +129,17 @@ export interface PdfAssetOverride {
   assetId?: string;
 }
 
-export type PdfAssetKey = "policyAtAGlance" | "officialAup";
+// "video" is included here too even though it's not a PDF — the welcome
+// video is the one other flow asset that's re-uploaded once and reused
+// (Source = Existing) rather than regenerated fresh per client.
+export type PdfAssetKey = "policyAtAGlance" | "officialAup" | "video";
 
 export type PdfAssetOverrides = Record<PdfAssetKey, PdfAssetOverride>;
 
 export const EMPTY_PDF_ASSET_OVERRIDES: PdfAssetOverrides = {
   policyAtAGlance: {},
   officialAup: {},
+  video: {},
 };
 
 export interface ParseMeta {

@@ -148,6 +148,10 @@ function buildItems(
       applyPdfAssetOverride(item, step, pdfAssetOverrides.officialAup, "AUP, source-policy");
     }
 
+    if (step.kind === "video" && step.id === "why-ai-safe-use-matters") {
+      applyExistingAssetOverride(item, pdfAssetOverrides.video);
+    }
+
     return item;
   });
 }
@@ -177,6 +181,22 @@ function applyPdfAssetOverride(
   item.source = "New";
   item.description = step.description;
   item.labels = newLabels;
+}
+
+/**
+ * The welcome video is already `Existing` by default (it's the same
+ * reused asset for every client, not regenerated per company) — unlike
+ * the PDFs above, a missing Asset ID here doesn't mean "flip to New," it
+ * just means the platform will resolve it by title-text search instead
+ * of an exact ID.
+ */
+function applyExistingAssetOverride(
+  item: FlowBuilderItem,
+  override: { title?: string; assetId?: string } | undefined
+) {
+  const assetId = override?.assetId?.trim();
+  if (assetId) item.assetId = assetId;
+  if (override?.title?.trim()) item.title = override.title.trim();
 }
 
 function buildQuestions(flow: MobilizationFlow, items: FlowBuilderItem[]) {
