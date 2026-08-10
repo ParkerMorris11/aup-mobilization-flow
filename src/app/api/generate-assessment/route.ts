@@ -68,8 +68,13 @@ export async function POST(request: Request) {
 
 ${sectionsBlock}
 
-Write 1-2 multiple-choice questions per section listed above (skip nothing, but do not invent extra sections). Each question must:
-- Test comprehension of ONE specific bullet from that section — not a vague generality.
+Write exactly 5 multiple-choice questions total — this is a short knowledge check, not a comprehensive exam. Select the 5 most important, most testable pieces of policy content across all the sections above:
+- Favor content where a wrong answer could cause real harm (data exposure, using an unapproved tool, skipping escalation) over minor or procedural details.
+- Aim for broad coverage across sections, but it's fine for a less critical section to get zero questions rather than force weak questions everywhere — do not invent extra sections.
+- If a section has very little content, it's fine to write more than one question from the same bullet rather than inventing new material — every question must still be grounded in a real, exact quote.
+
+Each question must:
+- Test comprehension of ONE specific bullet — not a vague generality.
 - Have 3-4 answer options: one correct, and 2-3 plausible-but-wrong distractors that relate to the SAME section/topic (not obviously unrelated or silly), so the question actually tests understanding rather than obvious elimination.
 - correctAnswer must be an exact string match of one of the options.
 - sourceQuote must be an exact verbatim substring copied from the bullet(s) of that section above — do not paraphrase it.

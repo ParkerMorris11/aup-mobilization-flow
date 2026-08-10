@@ -30,8 +30,12 @@ export const assessmentQuestionSchema = z.object({
     ),
 });
 
+// Matches the real BSI platform's Knowledge Check (5 questions, verified
+// against a live "Town of Brookhaven" flow) — the model is asked to select
+// the 5 most important, most testable pieces of policy content across
+// sections, not to mechanically cover every section.
 export const assessmentQuestionsSchema = z.object({
-  questions: z.array(assessmentQuestionSchema).min(1),
+  questions: z.array(assessmentQuestionSchema).length(5),
 });
 
 export type AssessmentQuestionOutput = z.infer<typeof assessmentQuestionSchema>;

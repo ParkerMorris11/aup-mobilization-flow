@@ -110,6 +110,30 @@ export function buildAssessmentQuestions(
     },
     {
       id: "assessment-3",
+      prompt: "Which of these is an approved way to use AI tools at work?",
+      options: [
+        sections.approvedTools[0] ?? "Use only organization-approved AI tools for business purposes.",
+        "Use any free consumer AI account if it gets the job done.",
+        "Ask a coworker to share their personal AI login.",
+      ],
+      correctAnswer:
+        sections.approvedTools[0] ?? "Use only organization-approved AI tools for business purposes.",
+      rationale: "Only tools the organization has approved and licensed are safe to use for company work.",
+    },
+    {
+      id: "assessment-4",
+      prompt: "Which of these must never be entered into an AI tool?",
+      options: [
+        sections.dataToProtect[0] ?? "Customer personal or financial information.",
+        "A generic product description.",
+        "A publicly available FAQ answer.",
+      ],
+      correctAnswer:
+        sections.dataToProtect[0] ?? "Customer personal or financial information.",
+      rationale: "Sensitive data must stay out of AI tools to prevent exposure or misuse.",
+    },
+    {
+      id: "assessment-5",
       prompt: "What should an employee do if they are unsure?",
       options: [
         sections.whenUnsure[0] ?? "Contact IT Security or your manager before proceeding.",
@@ -190,7 +214,7 @@ function buildFlowSteps(organizationName: string): FlowStep[] {
       title: `${organizationName} AI Knowledge Check`,
       kind: "assessment",
       description: "Knowledge check covering tools, data protection, and escalation.",
-      detail: "3 questions",
+      detail: "5 questions",
     },
     {
       id: "aup-exit-survey",

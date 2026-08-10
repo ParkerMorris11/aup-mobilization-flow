@@ -210,19 +210,25 @@ per-organization `localStorage` checklist described above.
 
 ### Step 4: Assessment questions
 
-`generate-assessment-questions.ts` calls `/api/generate-assessment`.
-**With a key**, Claude writes 1–2 grounded multiple-choice questions
-*per non-empty section* (so up to ~12, not a fixed 3) — each with a
-verbatim `sourceQuote` re-verified the same way as the section citations,
-and 2–3 plausible (not silly/obviously-wrong) distractors. **Without a
-key or on failure**, `buildAssessmentQuestions()` (`generate-flow.ts`)
-returns a **fixed 3-question template** — the prompts, wrong answers, and
+`generate-assessment-questions.ts` calls `/api/generate-assessment`. The
+Knowledge Check is always **exactly 5 questions**, matching the real BSI
+platform (verified against a live "Town of Brookhaven" flow) —
+`assessmentQuestionsSchema` (`generate-assessment-schema.ts`) enforces
+this with `.length(5)`. **With a key**, Claude picks the 5 most
+important, most testable pieces of policy content across all 6
+sections (favoring content where a wrong answer could cause real harm,
+not mechanically 1 per section) — each with a verbatim `sourceQuote`
+re-verified the same way as the section citations, and 2–3 plausible
+(not silly/obviously-wrong) distractors. **Without a key or on
+failure**, `buildAssessmentQuestions()` (`generate-flow.ts`) returns a
+**fixed 5-question template** — the prompts, wrong answers, and
 rationale text are hardcoded and identical for every company; only the
 *correct answer* is filled in dynamically from that company's actual
-`topRulesToRemember[0]` / `permittedUse[0]` / `whenUnsure[0]`. If you see
-exactly "Which of these best reflects a top rule to remember?" as
-question 1, you're looking at the fallback template, not an AI-generated
-quiz — that's a quick way to tell whether the API key is actually live.
+`topRulesToRemember[0]` / `permittedUse[0]` / `approvedTools[0]` /
+`dataToProtect[0]` / `whenUnsure[0]`. If you see exactly "Which of
+these best reflects a top rule to remember?" as question 1, you're
+looking at the fallback template, not an AI-generated quiz — that's a
+quick way to tell whether the API key is actually live.
 
 ### Step 5: Branding & employee PDF
 
