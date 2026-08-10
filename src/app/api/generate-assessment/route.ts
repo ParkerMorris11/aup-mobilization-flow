@@ -79,6 +79,7 @@ Each question must:
 - correctAnswer must be an exact string match of one of the options.
 - sourceQuote must be an exact verbatim substring copied from the bullet(s) of that section above — do not paraphrase it.
 - rationale is one sentence explaining why the correct answer is right, suitable to show the employee after they answer.
+- Vary the POSITION of the correct answer within the options list across the 5 questions — don't list it first every time, or let it fall into any other obvious pattern. An employee should not be able to guess "the answer is always first" after seeing a couple of questions.
 
 Keep prompts and options concise and in plain language suitable for a non-technical employee.`,
     });

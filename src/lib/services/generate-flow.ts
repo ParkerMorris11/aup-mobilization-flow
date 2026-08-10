@@ -79,69 +79,75 @@ function buildBaselineSurvey(organizationName: string): SurveyQuestion[] {
  * Deterministic fallback question set — used when LLM assessment generation
  * is unavailable (no API key, network failure, malformed response) so the
  * flow always has usable assessment content.
+ *
+ * The correct answer's position is deliberately varied per question
+ * (B, C, A, B, C below) rather than always listed first — an assessment
+ * where every correct answer is "A" looks unprofessional and lets
+ * employees game the quiz instead of actually reading it.
  */
 export function buildAssessmentQuestions(
   sections: ParsedAupSections
 ): AssessmentQuestion[] {
+  const topRule = sections.topRulesToRemember[0] ?? "Use only approved AI tools for work.";
+  const permitted = sections.permittedUse[0] ?? "Use approved AI tools to draft and structure work.";
+  const approvedTool = sections.approvedTools[0] ?? "Use only organization-approved AI tools for business purposes.";
+  const dataToProtect = sections.dataToProtect[0] ?? "Customer personal or financial information.";
+  const whenUnsure = sections.whenUnsure[0] ?? "Contact IT Security or your manager before proceeding.";
+
   return [
     {
       id: "assessment-1",
       prompt: "Which of these best reflects a top rule to remember?",
       options: [
-        sections.topRulesToRemember[0] ?? "Use only approved AI tools for work.",
         "Use any AI tool if it helps you move faster.",
+        topRule,
         "Skip policy review when the content is internal only.",
       ],
-      correctAnswer:
-        sections.topRulesToRemember[0] ?? "Use only approved AI tools for work.",
+      correctAnswer: topRule,
       rationale: "The top rules slide highlights the highest priority employee behaviors.",
     },
     {
       id: "assessment-2",
       prompt: "Which action is closest to permitted use?",
       options: [
-        sections.permittedUse[0] ?? "Use approved AI tools to draft and structure work.",
         "Paste sensitive customer data into a personal AI account.",
         "Send AI output externally without review.",
+        permitted,
       ],
-      correctAnswer:
-        sections.permittedUse[0] ?? "Use approved AI tools to draft and structure work.",
+      correctAnswer: permitted,
       rationale: "Permitted use focuses on approved tools and safe drafting workflows.",
     },
     {
       id: "assessment-3",
       prompt: "Which of these is an approved way to use AI tools at work?",
       options: [
-        sections.approvedTools[0] ?? "Use only organization-approved AI tools for business purposes.",
+        approvedTool,
         "Use any free consumer AI account if it gets the job done.",
         "Ask a coworker to share their personal AI login.",
       ],
-      correctAnswer:
-        sections.approvedTools[0] ?? "Use only organization-approved AI tools for business purposes.",
+      correctAnswer: approvedTool,
       rationale: "Only tools the organization has approved and licensed are safe to use for company work.",
     },
     {
       id: "assessment-4",
       prompt: "Which of these must never be entered into an AI tool?",
       options: [
-        sections.dataToProtect[0] ?? "Customer personal or financial information.",
         "A generic product description.",
+        dataToProtect,
         "A publicly available FAQ answer.",
       ],
-      correctAnswer:
-        sections.dataToProtect[0] ?? "Customer personal or financial information.",
+      correctAnswer: dataToProtect,
       rationale: "Sensitive data must stay out of AI tools to prevent exposure or misuse.",
     },
     {
       id: "assessment-5",
       prompt: "What should an employee do if they are unsure?",
       options: [
-        sections.whenUnsure[0] ?? "Contact IT Security or your manager before proceeding.",
         "Proceed if the task feels low risk.",
         "Use a personal AI account as a workaround.",
+        whenUnsure,
       ],
-      correctAnswer:
-        sections.whenUnsure[0] ?? "Contact IT Security or your manager before proceeding.",
+      correctAnswer: whenUnsure,
       rationale: "Escalation is the safe fallback for edge cases and uncertainty.",
     },
   ];
