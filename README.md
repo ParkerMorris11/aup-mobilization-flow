@@ -77,7 +77,7 @@ uploaded into the BSI Flow Builder platform:
 | # | Asset | Where it comes from | File |
 |---|-------|----------------------|------|
 | 1 | **Official Company AUP** | The original file/text uploaded in step 1, preserved as-is | Same name/format as the source upload (e.g. `.pdf`, `.txt`, `.docx`) |
-| 2 | **Employee AUP PDF** ("Your AI Policy at a Glance") | The branded slide deck built from the parsed sections in step 5 | Generated via `/pdf-preview` → browser Print → Save as PDF (not an automatic download — see Known quirks) |
+| 2 | **Employee AUP PDF** ("{Company} AI Employee Quick Reference") | The branded slide deck built from the parsed sections in step 5 | Generated via `/pdf-preview` → browser Print → Save as PDF (not an automatic download — see Known quirks) |
 | 3 | **Flow Builder Excel workbook** | The 3-sheet workbook built from the mobilization flow + assessment | `<company>-flow-builder-template.xlsx`, built by `src/lib/services/build-flow-builder-excel.ts` |
 
 The employee PDF and Official Company AUP map directly to the two
@@ -98,15 +98,21 @@ configured directly in the BSI platform, not produced by this app.
 
 ## Flow Builder assets (7 items)
 
+Asset titles below match the real BSI Flow Builder platform naming
+convention exactly (verified against a live "Town of Brookhaven" flow) —
+`{Company}` is the only part that changes between clients. See
+`buildFlowSteps()` in `src/lib/services/generate-flow.ts` — the titles
+there must stay in sync with this table.
+
 | Asset | Platform source |
 |-------|-----------------|
-| Why AI Safe Use Matters (video) | Existing |
-| AUP Welcome Survey | Existing |
-| Your AI Policy at a Glance (employee PDF) | New — download from app |
-| Official Company AUP | New — download from app |
-| AUP Assessment | Custom Questions |
-| Acknowledgment of Policy | Exisiting |
-| AUP Exit Survey | Existing |
+| Why an AI Acceptable Use Policy Matters (video) | Existing |
+| AI Baseline Survey | Existing |
+| {Company} AI Employee Quick Reference (employee PDF) | New — download from app |
+| {Company} AI Acceptable Use Policy | New — download from app |
+| {Company} AI Knowledge Check | Custom Questions |
+| {Company} AI Outcomes Survey | Existing |
+| Policy Review & Acknowledgment | Exisiting |
 
 ## How it works
 

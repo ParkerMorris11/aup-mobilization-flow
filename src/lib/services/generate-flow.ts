@@ -138,19 +138,27 @@ function buildExitSurvey(): SurveyQuestion[] {
   ];
 }
 
+/**
+ * Titles here match the real BSI Flow Builder platform naming convention
+ * exactly (confirmed against a live "Town of Brookhaven" flow) — only the
+ * organization name should ever change between clients. Don't reword these
+ * without checking against an actual platform export first: the platform
+ * matches "Existing" assets by title text when no Asset ID is given, so an
+ * inconsistent title silently breaks that lookup instead of erroring.
+ */
 function buildFlowSteps(organizationName: string): FlowStep[] {
   return [
     {
       id: "why-ai-safe-use-matters",
       group: "start",
-      title: `Welcome to AI at ${organizationName}`,
+      title: "Why an AI Acceptable Use Policy Matters",
       kind: "video",
       description: "Short intro video that explains why the policy exists.",
     },
     {
       id: "aup-welcome-survey",
       group: "start",
-      title: "Your AI Experience Survey",
+      title: "AI Baseline Survey",
       kind: "survey",
       description: "Baseline survey to understand current AI use and confidence.",
       detail: "3 questions",
@@ -158,21 +166,21 @@ function buildFlowSteps(organizationName: string): FlowStep[] {
     {
       id: "your-ai-policy-at-a-glance",
       group: "review",
-      title: `${organizationName} AI Quick Summary`,
+      title: `${organizationName} AI Employee Quick Reference`,
       kind: "pdf",
       description: "Employee-friendly PDF summary deck built from the parsed policy.",
     },
     {
       id: "official-company-aup",
       group: "review",
-      title: `${organizationName} Artificial Intelligence Use Policy`,
+      title: `${organizationName} AI Acceptable Use Policy`,
       kind: "pdf",
       description: "Full company AI policy document for reference.",
     },
     {
       id: "aup-assessment",
       group: "apply",
-      title: "AI Knowledge Check",
+      title: `${organizationName} AI Knowledge Check`,
       kind: "assessment",
       description: "Knowledge check covering tools, data protection, and escalation.",
       detail: "3 questions",
@@ -180,7 +188,7 @@ function buildFlowSteps(organizationName: string): FlowStep[] {
     {
       id: "aup-exit-survey",
       group: "complete",
-      title: "AI Learning Experience Survey",
+      title: `${organizationName} AI Outcomes Survey`,
       kind: "survey",
       description: "Feedback survey to measure clarity and remaining friction.",
       detail: "3 questions",
