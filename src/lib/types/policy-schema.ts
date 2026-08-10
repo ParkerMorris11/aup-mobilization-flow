@@ -42,6 +42,8 @@ export interface SurveyQuestion {
   type: "single_select" | "multi_select" | "scale" | "free_text";
   options?: string[];
   helperText?: string;
+  /** Matches the platform's per-question Required toggle — defaults to No (false) when omitted. */
+  required?: boolean;
 }
 
 export interface AssessmentQuestion {

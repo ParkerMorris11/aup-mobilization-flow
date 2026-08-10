@@ -261,7 +261,23 @@ panel — so a broken or incomplete export can't silently go out.
 7-step flow** (welcome video → baseline survey → employee PDF → official
 AUP → assessment → exit survey → acknowledgment) — the step
 titles/descriptions are templated with the org name, but the flow
-*shape* itself never changes company to company. `buildFlowBuilderWorkbook()`
+*shape* itself never changes company to company. The asset titles match
+the real BSI platform's naming convention exactly (verified against a
+live client flow) — see the comment above `buildFlowSteps()` before
+changing any of them, since the platform resolves `Existing` assets by
+title text when no Asset ID is given.
+
+The baseline survey (`buildBaselineSurvey()`) and outcomes survey
+(`buildOutcomesSurvey()`) are likewise **fixed, verbatim content** — the
+same 2 questions every time, with only the organization name
+substituted into the question text itself (not just the asset title).
+This isn't a template the app fills in from the parsed policy; it's the
+same 2-question baseline/outcomes pair the platform already uses for
+every client, reproduced exactly so re-generating a flow doesn't drift
+from what's already live. Only the AI Knowledge Check (the assessment)
+varies its content per policy — see Step 4 above.
+
+`buildFlowBuilderWorkbook()`
 (`build-flow-builder-excel.ts`) turns that into a 3-sheet `.xlsx`
 (via `exceljs`): a **Flow** sheet (title/description), an **Items**
 sheet (one row per flow step, marked `New` or `Existing`), and a

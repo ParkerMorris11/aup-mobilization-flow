@@ -202,7 +202,7 @@ function buildQuestions(flow: MobilizationFlow, items: FlowBuilderItem[]) {
         type,
         options:
           type === "text" || type === "rating" ? [] : (question.options ?? []),
-        required: "No",
+        required: question.required ? "Yes" : "No",
         branching: "No",
       });
     });
@@ -241,7 +241,7 @@ function buildQuestions(flow: MobilizationFlow, items: FlowBuilderItem[]) {
         type,
         options:
           type === "text" || type === "rating" ? [] : (question.options ?? []),
-        required: "No",
+        required: question.required ? "Yes" : "No",
         branching: "No",
       });
     });

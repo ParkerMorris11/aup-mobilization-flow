@@ -32,9 +32,9 @@ export function generateMobilizationFlow(
     plainLanguageSummary: `At ${organizationName}, AI is a productivity tool — not a shortcut around data protection, quality, or compliance. This guide translates our AI Acceptable Use Policy into everyday decisions: which tools to use, what data to keep out, when to review output, and when to ask for help. Most sessions take under 10 minutes.`,
     whatEmployeesCanDo,
     whatEmployeesShouldAvoid,
-    baselineSurvey: buildBaselineSurvey(),
+    baselineSurvey: buildBaselineSurvey(organizationName),
     assessmentQuestions: buildAssessmentQuestions(sections),
-    exitSurvey: buildExitSurvey(),
+    exitSurvey: buildOutcomesSurvey(organizationName),
     flowSteps: buildFlowSteps(organizationName),
     acknowledgmentStatement:
       "I have read and understand the AI Acceptable Use Policy. I will use only approved tools, protect sensitive data, review AI output before external use, and escalate when uncertain.",
@@ -43,26 +43,32 @@ export function generateMobilizationFlow(
   };
 }
 
-function buildBaselineSurvey(): SurveyQuestion[] {
+/**
+ * Matches the real platform's "AI Baseline Survey" exactly (verified against
+ * a live "Town of Brookhaven" flow) — same 2 questions every time, only the
+ * organization name inside the question text changes between clients.
+ */
+function buildBaselineSurvey(organizationName: string): SurveyQuestion[] {
   return [
     {
       id: "baseline-1",
-      prompt: "How often do you currently use AI tools in your work?",
+      prompt: `How confident are you in your ability to use AI effectively and responsibly in your role at ${organizationName}?`,
       type: "single_select",
-      options: ["Daily", "Weekly", "Monthly", "Rarely", "Never"],
+      options: ["Very Confident", "Confident", "Neutral", "Not Confident", "Very Not Confident"],
+      required: true,
     },
     {
       id: "baseline-2",
-      prompt: "How confident are you that you know which data should never go into AI tools?",
-      type: "scale",
-      options: ["1", "2", "3", "4", "5"],
-      helperText: "1 = not confident, 5 = very confident",
-    },
-    {
-      id: "baseline-3",
-      prompt: "Which AI tools do you currently use or want access to?",
-      type: "free_text",
-      helperText: "List any tools you use today or expect to use soon.",
+      prompt: "How many of your typical work tasks currently involve AI assistance?",
+      type: "single_select",
+      options: [
+        "All or almost all of my tasks",
+        "Most of my tasks",
+        "About half of my tasks",
+        "A few of my tasks",
+        "None of my tasks",
+      ],
+      required: true,
     },
   ];
 }
@@ -115,25 +121,24 @@ export function buildAssessmentQuestions(
   ];
 }
 
-function buildExitSurvey(): SurveyQuestion[] {
+/**
+ * Matches the real platform's "{Company} AI Outcomes Survey" exactly
+ * (verified against a live "Town of Brookhaven" flow) — same 2 questions
+ * every time, only the organization name inside the question text changes.
+ */
+function buildOutcomesSurvey(organizationName: string): SurveyQuestion[] {
   return [
     {
-      id: "exit-1",
-      prompt: "After this flow, how clear is the policy to you?",
-      type: "scale",
-      options: ["1", "2", "3", "4", "5"],
-      helperText: "1 = unclear, 5 = very clear",
-    },
-    {
-      id: "exit-2",
-      prompt: "What part of the policy still feels confusing?",
-      type: "free_text",
-    },
-    {
-      id: "exit-3",
-      prompt: "Would a manager follow-up session be helpful for your team?",
+      id: "outcomes-1",
+      prompt: `After completing this experience, how confident are you in your ability to use AI effectively and responsibly in your role at ${organizationName}?`,
       type: "single_select",
-      options: ["Yes", "No", "Not sure"],
+      options: ["Very Confident", "Confident", "Neutral", "Not Confident", "Very Not Confident"],
+      required: true,
+    },
+    {
+      id: "outcomes-2",
+      prompt: `What questions do you still have about using AI at ${organizationName}, and what additional guidance would help you use AI more confidently?`,
+      type: "free_text",
     },
   ];
 }
@@ -160,8 +165,8 @@ function buildFlowSteps(organizationName: string): FlowStep[] {
       group: "start",
       title: "AI Baseline Survey",
       kind: "survey",
-      description: "Baseline survey to understand current AI use and confidence.",
-      detail: "3 questions",
+      description: "Baseline check on AI confidence and current task usage before training.",
+      detail: "2 questions",
     },
     {
       id: "your-ai-policy-at-a-glance",
@@ -190,8 +195,8 @@ function buildFlowSteps(organizationName: string): FlowStep[] {
       group: "complete",
       title: `${organizationName} AI Outcomes Survey`,
       kind: "survey",
-      description: "Feedback survey to measure clarity and remaining friction.",
-      detail: "3 questions",
+      description: "Post-training check on confidence using AI and any remaining questions.",
+      detail: "2 questions",
     },
     {
       id: "acknowledgment-of-policy",
