@@ -269,6 +269,73 @@ export without recording that ID (`pdfAssetOverrides` in
 `FlowBuilderExportPanel`) will tell the platform to create a duplicate
 asset instead of reusing the one already uploaded.
 
+### QA'ing the Excel export against the platform spec
+
+The `.xlsx` this app generates has to satisfy the BSI Flow Builder
+platform's exact ingestion rules — wrong column order, a stray value in
+the wrong cell, or an unmet constraint (e.g. more than one branching
+question per survey) gets the **whole file rejected** at upload, not
+just one row. Those rules are captured in a Claude Code skill,
+`.claude/skills/flow-builder-template/SKILL.md` — checked into this
+repo specifically so whoever inherits this project keeps access to it.
+That skill's primary job is generating a template from a designer's
+raw notes, but its "Template structure" and "Inference rules" sections
+are the authoritative spec for the format, so it doubles as a QA
+checklist for output this app generates itself.
+
+To QA a real export:
+
+1. Generate the workbook the same way the app does, without needing a
+   browser — the export functions are plain TypeScript with no DOM
+   dependency, so they run directly under `tsx`:
+   ```js
+   import { extractParsedSectionsWithFallbackFlags } from "./src/lib/services/extract-parsed-sections-from-text.ts";
+   import { generateMobilizationFlow } from "./src/lib/services/generate-flow.ts";
+   import { buildFlowBuilderWorkbook } from "./src/lib/services/build-flow-builder-excel.ts";
+   import { SAMPLE_AUP_TEXT } from "./src/lib/mock/sample-aup.ts";
+
+   const { sections } = extractParsedSectionsWithFallbackFlags(SAMPLE_AUP_TEXT);
+   const flow = generateMobilizationFlow(sections, "Acme Corp");
+   const { workbook } = await buildFlowBuilderWorkbook(flow);
+   // workbook.xlsx.writeBuffer() / .writeFile("out.xlsx") from here
+   ```
+   Run with `npx tsx <script>.mjs`. Swap in a real company's parsed
+   `sections` (from `sessionStorage`, or by pasting their actual AUP
+   text through `extractParsedSectionsWithFallbackFlags`) to check a
+   specific client's export rather than the sample.
+2. Read the written file back with `ExcelJS.Workbook().xlsx.readFile()`
+   and dump each sheet's actual cells — this checks what's really on
+   disk, not just the JS objects that produced it.
+3. Check the dump against the skill's "Template structure" section,
+   sheet by sheet:
+   - **Flow**: exactly 3 rows (Title/Description/Software Application),
+     no Pack row.
+   - **Items**: the 11 columns in exact position order; `Source` and
+     the three assessment-scoring columns (`Show Correct Answers`,
+     `Percentage Required`, `Percentage Value`) populated only where
+     the spec says to (New Assessment rows only; blank everywhere else).
+   - **Questions**: `Asset Title` exactly matches the corresponding
+     `Title` in Items (case-sensitive); option columns padded with
+     blanks rather than narrower rows; `Correct`/`Required`/`Branching`/
+     `Require All Correct` populated only where each type allows.
+4. As a last resort, `getFlowBuilderFlags()`
+   (`src/lib/services/build-flow-builder-excel.ts`) and
+   `validateFlowBuilderWorkbook()`
+   (`src/lib/services/validate-flow-builder-workbook.ts`) are the same
+   checks `DownloadsPanel` runs before allowing a download — call them
+   on the same `items`/`questions` to see what the UI would have
+   flagged.
+
+Doing this against the built-in sample AUP confirmed the export is
+currently fully spec-compliant: correct column order and positions on
+all 3 sheets, correct `New`/`Existing` defaults, exact `Asset Title` ↔
+`Title` matches, section headers only on the first item per group, and
+correct blank-vs-populated handling on every conditional column. The
+only spec capabilities this app doesn't exercise are branching survey
+questions, multi-answer (`multiple-choice`) assessment questions, and
+custom assessment scoring thresholds — not defects, just flow features
+this app's fixed 7-step template doesn't currently need.
+
 ## Architecture
 
 ```

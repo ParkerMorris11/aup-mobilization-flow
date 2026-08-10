@@ -36,8 +36,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# claude code local session config
-/.claude/
+# claude code local session config (but keep shared project skills)
+/.claude/*
+!/.claude/skills/
 
 # internal-only project docs (implementation notes, pitch decks, test results)
 /docs/
