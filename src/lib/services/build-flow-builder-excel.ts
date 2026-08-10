@@ -222,7 +222,7 @@ function buildQuestions(flow: MobilizationFlow, items: FlowBuilderItem[]) {
       questionNumber: 1,
       questionText: flow.acknowledgmentStatement,
       type: "single-select",
-      options: ["I acknowledge"],
+      options: ["I Acknowledge", "I Do Not Acknowledge"],
       required: "Yes",
       branching: "No",
     });

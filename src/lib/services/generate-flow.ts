@@ -36,8 +36,10 @@ export function generateMobilizationFlow(
     assessmentQuestions: buildAssessmentQuestions(sections),
     exitSurvey: buildOutcomesSurvey(organizationName),
     flowSteps: buildFlowSteps(organizationName),
-    acknowledgmentStatement:
-      "I have read and understand the AI Acceptable Use Policy. I will use only approved tools, protect sensitive data, review AI output before external use, and escalate when uncertain.",
+    // Matches the real platform's "Policy Review & Acknowledgment" question
+    // exactly (verified against a live "Town of Brookhaven" flow) — only the
+    // organization name changes between clients.
+    acknowledgmentStatement: `By selecting "I Acknowledge," you confirm that you have reviewed and agree to comply with the ${organizationName} Artificial Intelligence Use Policy.`,
     managerRolloutNote:
       "Managers: share this flow in your next team standup (5 min). Emphasize that escalation is encouraged, not penalized. Track completion in your department dashboard. Direct repeated questions to IT Security.",
   };
