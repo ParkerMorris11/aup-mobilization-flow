@@ -39,6 +39,38 @@ If it's missing, the app degrades to a heuristic (non-AI) text parser
 instead of failing outright, which is useful for a quick offline smoke
 test but noticeably less accurate — don't rely on it for real output.
 
+## Onboarding a client: the simple version
+
+The short version of running this for a real client, start to finish —
+no technical detail, just what to click, what to download, and what to
+upload where.
+
+1. **Upload the client's AUP.** Paste the text or upload their file,
+   type their company name, and click "Parse & generate flow."
+2. **Check the parsed sections.** Skim the 6 sections it pulled out and
+   fix anything wrong before moving on.
+3. **Check the 5 Knowledge Check questions.** Edit any that look off.
+4. **Set branding** (company name, colors, policy title) and preview
+   the employee PDF.
+5. **If you're reusing an already-uploaded asset** — the welcome video,
+   or a PDF from a previous export of the same client — paste its
+   platform Asset ID into the Flow Builder assets step now, before you
+   download the Excel file.
+6. **Download 3 files** from the "Download & export" step:
+   - the original AUP
+   - the employee PDF ("Download PDF" → your browser's Print dialog →
+     Save as PDF)
+   - the Flow Builder Excel workbook
+7. **Open the BSI Flow Builder app** (the "Open Flow Builder to
+   upload" button takes you there).
+8. **Upload the 2 new PDFs first**, if this is a new client — Flow
+   Builder needs them to exist before the spreadsheet can reference
+   them. Note the Asset ID it gives each one, for next time.
+9. **Upload the Excel workbook** into Flow Builder — this creates the
+   actual flow.
+10. **Spot-check the created flow** against the spreadsheet before
+    telling the client it's ready.
+
 ## The 7-step workflow
 
 Everything happens on a single page (`/`) as a 7-step wizard
