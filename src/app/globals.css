@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-salt: #f6f4ed;
+  --color-alpine: #23403b;
+}
+
+body {
+  @apply bg-salt font-body text-[15px] leading-relaxed text-alpine antialiased;
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Employee AUP PDF — 1600×900 slides */
+.pdf-document {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pdf-slide {
+  flex-shrink: 0;
+  box-shadow: 0 4px 24px rgba(35, 64, 59, 0.12);
+}
+
+/* html2canvas ignores @media print, so html2pdf's fixed-height pagination
+   needs zero gap between slides here — otherwise each slide's true offset
+   drifts away from the page-height multiples jsPDF slices at, and every
+   slide after the first spills across a page boundary. */
+.pdf-export .pdf-document {
+  gap: 0;
+}
+
+.pdf-export .pdf-slide {
+  box-shadow: none;
+}
+
+@media print {
+  @page {
+    size: 1600px 900px;
+    margin: 0;
+  }
+
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body > header,
+  body > footer,
+  body > nav,
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .pdf-document {
+    gap: 0;
+  }
+
+  .pdf-slide {
+    box-shadow: none;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .pdf-slide:last-child {
+    page-break-after: auto;
+  }
+}

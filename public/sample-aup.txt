@@ -1,0 +1,2 @@
+ACME CORPORATION - AI Acceptable Use Policy (sample)
+See src/lib/mock/sample-aup.ts for full text.
