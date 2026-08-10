@@ -35,7 +35,6 @@ export function AppShell({
               alt="BrainStorm"
               width={130}
               height={14}
-              className="h-3.5 w-auto"
             />
             <div className="border-l border-alpine/15 pl-3">
               <p className="text-sm font-semibold text-alpine">

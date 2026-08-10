@@ -39,6 +39,7 @@ import {
 
 const STORAGE_KEY = "aup-mobilization-state-v4";
 const INLINE_FILE_LIMIT_BYTES = 1_500_000;
+const MAX_UPLOAD_FILE_BYTES = 25_000_000;
 
 export interface UnresolvedCitation {
   sectionKey: keyof ParsedAupSections;
@@ -222,6 +223,7 @@ export function MobilizationProvider({
     state.customClarifyingQuestions,
     state.dismissedClarifyingFlags,
     state.clarifyingAnswerNotes,
+    state.uploadedAup,
   ]);
 
   const finalizeFlow = useCallback(
@@ -395,6 +397,12 @@ export function MobilizationProvider({
       }));
 
       try {
+        if (file.size > MAX_UPLOAD_FILE_BYTES) {
+          throw new Error(
+            `File is too large (${(file.size / 1_000_000).toFixed(1)} MB). Please upload a file under ${MAX_UPLOAD_FILE_BYTES / 1_000_000} MB.`
+          );
+        }
+
         const ext = file.name.split(".").pop()?.toLowerCase();
         let text = "";
 

@@ -12,18 +12,10 @@ the Next.js app itself.
 ```bash
 cd aup-mobilization-flow
 npm install
-cp .env.example .env.local   # optional, see below
-npm run dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3004](http://localhost:3004).
-
-### Optional AI parsing
-
-Without `ANTHROPIC_API_KEY` set, the app falls back to heuristic
-(non-AI) text parsing automatically — it still works end to end, just
-with less accurate section extraction. To enable AI-assisted parsing,
-put a real key in `.env.local`:
+Then open `.env.local` and set your Anthropic API key:
 
 ```bash
 ANTHROPIC_API_KEY=sk-ant-...
@@ -31,6 +23,21 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 Get a key from the [Anthropic Console](https://console.anthropic.com/).
 Never commit a real key — `.env*` is gitignored except `.env.example`.
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3004](http://localhost:3004).
+
+### Why the API key matters
+
+`ANTHROPIC_API_KEY` drives the AI-assisted parsing that extracts the 6
+employee sections and generates the assessment questions — this is the
+core value of the app, so set it up before using this for real policies.
+If it's missing, the app degrades to a heuristic (non-AI) text parser
+instead of failing outright, which is useful for a quick offline smoke
+test but noticeably less accurate — don't rely on it for real output.
 
 ## The 7-step workflow
 
@@ -43,7 +50,8 @@ pages for the main flow:
    for a quick smoke test. Enter a company name. The original file is
    preserved for later download.
 2. **Parse with AI** — auto-advances while `/api/parse-aup` extracts 6
-   employee-facing sections (falls back to heuristic parsing if no API key).
+   employee-facing sections using `ANTHROPIC_API_KEY` (falls back to a
+   less-accurate heuristic parser only if no key is set).
 3. **Edit sections** — review/edit the 6 parsed sections before they flow
    into the PDF and Excel export.
 4. **Review assessment** — AI-generated knowledge-check questions; edit or
@@ -61,15 +69,23 @@ pages for the main flow:
 A session can be exported/imported as a JSON backup (buttons on step 1)
 so work isn't lost if browser storage is cleared.
 
-## Routes
+## The 3 assets you upload to BSI
 
-| Route | Purpose |
-|-------|---------|
-| `/` | The 7-step wizard described above — this is the app |
-| `/admin` | Alternate/legacy tabbed view over the same state (source doc, sections, branding, PDF, downloads, Flow Builder export) |
-| `/admin?tab=downloads` | Consolidated download hub within `/admin` |
-| `/pdf-preview` | Employee AUP PDF preview and Print/Save |
-| `/flow` | Mobilization flow preview |
+Step 6, "Download & export," produces the three files that get manually
+uploaded into the BSI Flow Builder platform:
+
+| # | Asset | Where it comes from | File |
+|---|-------|----------------------|------|
+| 1 | **Official Company AUP** | The original file/text uploaded in step 1, preserved as-is | Same name/format as the source upload (e.g. `.pdf`, `.txt`, `.docx`) |
+| 2 | **Employee AUP PDF** ("Your AI Policy at a Glance") | The branded slide deck built from the parsed sections in step 5 | Generated via `/pdf-preview` → browser Print → Save as PDF (not an automatic download — see Known quirks) |
+| 3 | **Flow Builder Excel workbook** | The 3-sheet workbook built from the mobilization flow + assessment | `<company>-flow-builder-template.xlsx`, built by `src/lib/services/build-flow-builder-excel.ts` |
+
+The employee PDF and Official Company AUP map directly to the two
+"New — download from app" rows in the Flow Builder assets table below;
+the Excel workbook is the upload vehicle for the full flow definition
+(all 7 assets) into BSI's Flow Builder. The remaining 4 assets in that
+table (welcome survey, assessment, acknowledgment, exit survey) are
+configured directly in the BSI platform, not produced by this app.
 
 ## Parsed employee sections
 

@@ -48,7 +48,6 @@ export function WizardShell({
               alt="BrainStorm"
               width={140}
               height={15}
-              className="h-[15px] w-auto"
               priority
             />
           </Link>
