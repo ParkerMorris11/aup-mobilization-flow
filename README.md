@@ -172,7 +172,8 @@ different browser storages back it, on purpose:
   so revisiting the same client's AUP days later restores where you left
   off on that checklist, independent of the main session state.
 - **IndexedDB** (`file-storage.ts`, database `aup-mobilization-files`) —
-  original uploaded files larger than 1.5MB (`INLINE_FILE_LIMIT_BYTES`)
+  original uploaded files larger than 1.5MB (`INLINE_FILE_LIMIT_BYTES`,
+  defined in `MobilizationContext.tsx`)
   are stored here instead of inline as base64 in `sessionStorage`, to
   avoid blowing that storage's size limit. Smaller files are embedded
   directly in the session state as a base64 string.
@@ -232,7 +233,7 @@ weighted heaviest), and how many section headings were detectable at all
 ### Step 3: Edit sections & citations
 
 Each bullet in `ParsedSectionsPanel` carries a citation
-(`section-citations.ts`) — the quote it's grounded in, and whether that
+(`lib/types/section-citations.ts`) — the quote it's grounded in, and whether that
 grounding was verified. Sparse sections (few or no bullets) get
 AI-generated "clarifying prompts" (`generate-clarifying-prompts.ts`,
 server-side, so this list is empty in the heuristic-fallback path) —
@@ -268,7 +269,7 @@ quick way to tell whether the API key is actually live.
 name and policy title when you don't type them explicitly: it tries the
 explicit form input first, then pattern-matches the document text itself
 (`extractCompanyNameFromText`/`extractPolicyTitleFromText` in
-`org-branding.ts`), then falls back to guessing from the uploaded
+`lib/types/org-branding.ts`), then falls back to guessing from the uploaded
 filename. A filename-derived guess sets `orgNameNeedsReview = true`,
 which shows a warning banner on the PDF preview — a heading actually
 found in the document is trusted; a filename guess is flagged for a
@@ -278,7 +279,7 @@ human to confirm before it goes out on a client-facing PDF.
 sections into a cover slide + one slide per section (fixed left-column
 copy per section from `section-left-copy.ts`, right column = that
 section's actual bullets), themed with the branding colors
-(`build-theme.ts`). `PdfPreviewContent.tsx` renders this at a fixed
+(`lib/pdf/build-theme.ts`). `PdfPreviewContent.tsx` renders this at a fixed
 1600×900px off-screen node and exports it via `html2pdf.js`
 (html2canvas + jsPDF under the hood) sized to match exactly — this is
 why "Download PDF" triggers a same-tab file save via `html2pdf.js`,
@@ -412,9 +413,13 @@ src/
 ├── components/
 │   ├── admin/       # Parsed sections, branding, downloads, flow export panels
 │   ├── pdf/         # Employee PDF slide deck (left titles / right content)
+│   ├── upload/      # Step 1 upload form (AupUploadForm.tsx)
+│   ├── layout/      # Shared page chrome
+│   ├── ui/          # Low-level shared UI primitives
 │   └── wizard/      # Step shell/nav used by the home-page wizard
 ├── context/
 │   └── MobilizationContext.tsx   # All session state (localStorage + IndexedDB for large files)
+├── types/    # App-wide shared types, separate from lib/types below
 └── lib/
     ├── services/
     │   ├── parse-aup.ts                    # Client parse orchestrator
@@ -426,15 +431,19 @@ src/
     │   ├── validate-flow-builder-workbook.ts
     │   ├── file-storage.ts                 # Original file preservation (IndexedDB)
     │   └── download-assets.ts              # BSI download helpers
-    ├── types/    # Zod schemas / shared types for sections, flow, branding
-    └── mock/     # Built-in sample AUP used by "Load sample AUP"
+    ├── types/       # Zod schemas / shared types for sections, branding, citations
+    ├── schemas/     # AI response schemas (e.g. generate-assessment-schema.ts)
+    ├── pdf/         # PDF theming (build-theme.ts)
+    ├── constants/   # Shared constant values
+    └── mock/        # Built-in sample AUP used by "Load sample AUP"
 ```
 
 ## Testing
 
 ```bash
 npm run test    # Vitest — currently 3 test files, covering PDF text
-                 # extraction and semantic section search only.
+                 # extraction, semantic section search, and sparse-section
+                 # detection only.
 npm run lint
 npm run build   # Also the closest thing to a full type-check
 ```
