@@ -10,9 +10,10 @@ the Next.js app itself.
 ## Quick start
 
 ```bash
+git clone https://github.com/ParkerMorris11/aup-mobilization-flow.git
 cd aup-mobilization-flow
 npm install
-cp .env.example .env.local
+cp .env.example .env.local 
 ```
 
 Then open `.env.local` and set your Anthropic API key:
