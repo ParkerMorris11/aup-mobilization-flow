@@ -10,9 +10,10 @@ the Next.js app itself.
 ## Quick start
 
 ```bash
+git clone https://github.com/ParkerMorris11/aup-mobilization-flow.git
 cd aup-mobilization-flow
 npm install
-cp .env.example .env.local
+cp .env.example .env.local 
 ```
 
 Then open `.env.local` and set your Anthropic API key:
@@ -71,35 +72,6 @@ upload where.
 10. **Spot-check the created flow** against the spreadsheet before
     telling the client it's ready.
 
-## The 7-step workflow
-
-Everything happens on a single page (`/`) as a 7-step wizard
-(`src/app/page.tsx`). There's no click-through between separate route
-pages for the main flow:
-
-1. **Upload AUP** — paste text, upload a PDF/TXT/DOCX file, or click
-   "Load sample AUP" to use the built-in sample (`src/lib/mock/sample-aup.ts`)
-   for a quick smoke test. Enter a company name. The original file is
-   preserved for later download.
-2. **Parse with AI** — auto-advances while `/api/parse-aup` extracts 6
-   employee-facing sections using `ANTHROPIC_API_KEY` (falls back to a
-   less-accurate heuristic parser only if no key is set).
-3. **Edit sections** — review/edit the 6 parsed sections before they flow
-   into the PDF and Excel export.
-4. **Review assessment** — AI-generated knowledge-check questions; edit or
-   regenerate.
-5. **Generate employee AUP** — set branding (company name, colors, cover
-   copy) and preview the formatted employee PDF slide deck.
-6. **Download & export** — download the original AUP, the employee PDF
-   (opens `/pdf-preview` in a new tab — use the browser's Print → Save as
-   PDF, this is not an automatic file download by design), and the Flow
-   Builder Excel workbook.
-7. **Flow builder assets** — preview the 6-asset sequence for the BSI
-   Flow Builder platform, then use "Open Flow Builder to upload" to hand
-   the assets off.
-
-A session can be exported/imported as a JSON backup (buttons on step 1)
-so work isn't lost if browser storage is cleared.
 
 ## The 3 assets you upload to BSI
 
