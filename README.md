@@ -1,10 +1,6 @@
 # AUP Toolkit
 
-Turn any company AI Acceptable Use Policy into a structured employee learning experience, complete with seven assets, a branded PDF guide, and a Flow Builder Excel file ready for upload to the BSI platform. 
-
-
-
-
+Turn any company AI Acceptable Use Policy into a structured employee learning experience, complete with seven assets, a branded PDF guide, and a Flow Builder Excel file ready for upload to the BSI platform.
 
 ## Quick start
 
@@ -142,11 +138,6 @@ The AUP Toolkit transforms a company's AI Acceptable Use Policy into a
 deployable employee learning experience. The application is built with
 Next.js, React, and TypeScript, with all processing and state managed
 client-side. No database is required.
-
-Next.js 15 / React 19 / TypeScript app. No backend database — all session
-state lives in the browser (`sessionStorage`, key `aup-mobilization-state-v4`)
-plus IndexedDB for large uploaded files. There is nothing to deploy besides
-the Next.js app itself.
 
 ### State & persistence
 
