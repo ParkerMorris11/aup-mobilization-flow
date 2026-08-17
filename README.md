@@ -130,7 +130,7 @@ there must stay in sync with this table.
 | {Company} AI Acceptable Use Policy | New — download from app |
 | {Company} AI Knowledge Check | Custom Questions |
 | {Company} AI Outcomes Survey | Existing |
-| Policy Review & Acknowledgment | Exisiting |
+| Policy Review & Acknowledgment | Existing |
 
 ## How it works
 
@@ -403,4 +403,20 @@ npm run build   # Also the closest thing to a full type-check
 
 ## Known quirks
 
-
+- **"Download PDF" isn't a real download.** It opens `/pdf-preview` in a
+  new tab and relies on the browser's Print dialog ("Save as PDF") to
+  produce the file, rather than triggering an automatic download. This
+  is intentional (browser PDF rendering gives more reliable pagination
+  than a server-side PDF library), but it means the step requires a
+  manual click-through and can't be scripted or automated.
+- **Re-exporting without recording Asset IDs creates duplicates.** The
+  employee PDF and Official AUP start as "New" assets in the generated
+  workbook. Once uploaded to BSI once, they get a real platform Asset
+  ID — if that ID isn't pasted into the Flow Builder assets step before
+  the next export, the platform will create a second, duplicate asset
+  instead of reusing the one already live.
+- **`sessionStorage` is intentionally ephemeral.** Closing the tab or
+  browser clears the working session by design, so the app always opens
+  clean rather than resurrecting a previous client's policy. Use the
+  JSON export/import feature (see State & persistence above) if you need
+  to hand off or resume a session later.

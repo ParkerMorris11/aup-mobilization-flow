@@ -90,7 +90,7 @@ function FlowSummary() {
         Your Learning Experience
       </motion.div>
       <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="relative mt-4 text-6xl font-extrabold">
-        Here's what's ahead
+        Here&apos;s what&apos;s ahead
       </motion.h1>
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="relative mt-4 text-xl text-slate-300">
         A clear path from policy awareness to confident action.
