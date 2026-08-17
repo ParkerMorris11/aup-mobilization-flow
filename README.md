@@ -71,6 +71,25 @@ upload where.
 10. **Spot-check the created flow** against the spreadsheet before
     telling the client it's ready.
 
+## Automation Boundaries
+### Fully Automated ✅
+- Policy parsing
+- Section extraction
+- PDF generation
+- Assessment generation
+- Excel workbook generation
+- Flow structure creation
+### Human Review Recommended ⚠️
+- Employee-facing content
+- Assessment accuracy
+- Branding
+- Final deployment validation
+### Manual Platform Steps 👤
+- Upload PDF assets
+- Maintain Asset IDs
+- Upload workbook
+- Publish flow
+
 
 ## The 3 assets you upload to BSI
 
