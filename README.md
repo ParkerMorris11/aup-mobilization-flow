@@ -39,7 +39,7 @@ If it's missing, the app degrades to a heuristic (non-AI) text parser
 instead of failing outright, which is useful for a quick offline smoke
 test but noticeably less accurate — don't rely on it for real output.
 
-## Onboarding a client: the simple version
+## How It Works The Simple Version
 
 The short version of running this for a real client, start to finish —
 no technical detail, just what to click, what to download, and what to
