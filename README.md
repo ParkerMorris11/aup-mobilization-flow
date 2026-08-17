@@ -120,187 +120,153 @@ there must stay in sync with this table.
 
 ## How it works
 
-This section explains the actual mechanics behind each step — what code
-runs, what it does when the AI path is unavailable, and how data flows
-between pieces. Everything below is state that lives entirely in the
-browser; there is no database and no server-side session.
+The AUP Toolkit transforms a company's AI Acceptable Use Policy into a
+deployable employee learning experience. The application is built with
+Next.js, React, and TypeScript, with all processing and state managed
+client-side. No database is required.
 
 ### State & persistence
 
-All wizard state (`MobilizationContext.tsx`) lives in one big object:
-the uploaded document, parsed sections, citations, branding, the
-mobilization flow, assessment questions, and various override maps. Two
-different browser storages back it, on purpose:
+The toolkit stores uploaded documents, parsed sections, branding,
+assessment questions, and flow configuration locally in the browser:
 
-- **`sessionStorage`**, key `aup-mobilization-state-v4` — the whole state
-  object, written on every change. Survives a page refresh mid-session,
-  but clears when the tab/browser closes, so the app always opens on a
-  clean upload screen rather than resurrecting whatever client's policy
-  was last tested.
-- **`localStorage`**, key `aup-checklist:<slugified-org-name>`
-  (`checklist-storage.ts`) — just the "clarifying checklist" overrides
-  (dismissed flags, custom questions, answer notes) for sparse sections,
-  keyed per organization name. This one *does* persist across sessions,
-  so revisiting the same client's AUP days later restores where you left
-  off on that checklist, independent of the main session state.
-- **IndexedDB** (`file-storage.ts`, database `aup-mobilization-files`) —
-  original uploaded files larger than 1.5MB (`INLINE_FILE_LIMIT_BYTES`,
-  defined in `MobilizationContext.tsx`)
-  are stored here instead of inline as base64 in `sessionStorage`, to
-  avoid blowing that storage's size limit. Smaller files are embedded
-  directly in the session state as a base64 string.
-- A full session can be exported as a JSON file and re-imported
-  (buttons on step 1) — a manual backup mechanism independent of both
-  storages above, so work survives even if browser storage is cleared.
+- **`sessionStorage`** stores the active working session — cleared when
+  the tab/browser closes, so the app always opens on a clean upload
+  screen rather than resurrecting whatever client's policy was last
+  tested.
+- **`localStorage`** stores organization-specific review notes and
+  overrides (dismissed flags, custom questions, answer notes), keyed per
+  organization name — this persists across sessions, so revisiting the
+  same client's AUP days later restores where you left off.
+- **IndexedDB** stores larger uploaded files (over 1.5MB), so big source
+  documents don't blow past the browser's storage limits.
+- A full session can be exported and re-imported as JSON — a manual
+  backup/handoff mechanism independent of the browser storages above.
 
-### Step 1 → 2: Upload and parse
+### Step 1: Upload & parse policy
 
-Uploading (`MobilizationContext.uploadFile`/`uploadPastedText`) extracts
-raw text — `pdfjs-dist` for PDFs, `mammoth` for DOCX, `file.text()` for
-plain text — then calls `parseAup()` (`lib/services/parse-aup.ts`),
-which POSTs to `/api/parse-aup`.
+The toolkit accepts PDF, DOCX, and plain text policies.
 
-**With `ANTHROPIC_API_KEY` set**, that route uses the Vercel AI SDK's
-`generateObject` with Claude (`claude-sonnet-4-5`) and a Zod schema
-(`parse-aup-schema.ts`) to extract the 6 employee sections. The prompt
-requires each bullet to come with a **verbatim quote** from the source
-text; the route re-verifies that quote actually appears in the document
-(`verifyQuoteInSource`) before trusting it — an LLM claiming a quote
-that isn't real gets that citation silently dropped, not surfaced as fact.
-It also detects section headings (`extract-structure-outline.ts`) and
-feeds them back into the prompt as anchors, and truncates documents over
-120,000 characters with a `truncationWarning` surfaced to the UI.
+When an `ANTHROPIC_API_KEY` is available, Claude extracts and structures
+policy content into six employee-focused sections using a predefined
+schema and source-grounded citations — each extracted bullet must come
+with a verbatim quote from the source text, which the app re-verifies
+actually appears in the document before trusting it.
 
-**Without a key, or if the AI call fails**, the same route (and the
-client, if the request never reaches the server) falls back to a fully
-deterministic **heuristic parser** with two layers:
+If AI is unavailable (or the AI call fails), the toolkit falls back to a
+deterministic parser that uses semantic matching and keyword analysis to
+categorize content instead. The parser intentionally leaves gaps empty
+rather than generating unsupported content — a section with nothing to
+match is left blank so staff can fill it in by hand, instead of the tool
+inventing plausible-looking boilerplate.
 
-1. **Semantic search** (`semantic-section-search.ts`) — the primary
-   method. Every line is tagged with one or more content *themes*
-   (`data_restrictions`, `approved_tools`, `escalation`, etc.) based on
-   regex/keyword rules, then each of the 6 employee sections pulls its
-   top-scoring lines from the themes relevant to it. This is why it
-   handles prose documents (not just documents with matching headings) —
-   a data-protection sentence buried inside a "Security Overview"
-   section still gets tagged `data_restrictions` and picked up by the
-   `dataToProtect` section regardless of which heading it sat under.
-2. **Regex fallback** (`extract-parsed-sections-from-text.ts`) — only
-   used if semantic search finds literally nothing. A simpler
-   single-pass keyword/regex scan over the same 6 categories.
+### Step 2: Generate employee sections
 
-Both heuristic layers report **honest gaps**: a section with no real
-match is left as an empty array, never backfilled with generic
-boilerplate — the UI is expected to prompt staff to write that section
-themselves rather than silently shipping invented content. Documents
-under 10 usable lines are flagged `documentTooShort` outright.
+Policy content is organized into six standard sections:
 
-Every bullet also gets a **confidence score** (`compute-parse-confidence.ts`),
-recomputed client-side from the *final* sections (never trusted as-is
-from the network) as a weighted blend of: how many of the 6 sections got
-real content (`sectionCoverage`), how much of the extracted wording
-actually reuses vocabulary from the source document (`textGrounding`,
-weighted heaviest), and how many section headings were detectable at all
-(`structureSignal`).
+1. Top Rules to Remember
+2. What Can I Do?
+3. What Tools Can I Use?
+4. What Data Must I Protect?
+5. What Am I Responsible For?
+6. What Do I Do If I'm Unsure?
 
-### Step 3: Edit sections & citations
+Each section includes source citations and a confidence score to
+support review.
 
-Each bullet in `ParsedSectionsPanel` carries a citation
-(`lib/types/section-citations.ts`) — the quote it's grounded in, and whether that
-grounding was verified. Sparse sections (few or no bullets) get
-AI-generated "clarifying prompts" (`generate-clarifying-prompts.ts`,
-server-side, so this list is empty in the heuristic-fallback path) —
-suggested questions staff can answer to fill the gap manually. Answers,
-dismissals, and custom questions here are what get saved to the
-per-organization `localStorage` checklist described above.
+### Step 3: Review & refine
 
-### Step 4: Assessment questions
+Generated content can be edited before export. Reviewers can:
 
-`generate-assessment-questions.ts` calls `/api/generate-assessment`. The
-Knowledge Check is always **exactly 5 questions**, matching the real BSI
-platform (verified against a live "Town of Brookhaven" flow) —
-`assessmentQuestionsSchema` (`generate-assessment-schema.ts`) enforces
-this with `.length(5)`. **With a key**, Claude picks the 5 most
-important, most testable pieces of policy content across all 6
-sections (favoring content where a wrong answer could cause real harm,
-not mechanically 1 per section) — each with a verbatim `sourceQuote`
-re-verified the same way as the section citations, and 2–3 plausible
-(not silly/obviously-wrong) distractors. **Without a key or on
-failure**, `buildAssessmentQuestions()` (`generate-flow.ts`) returns a
-**fixed 5-question template** — the prompts, wrong answers, and
-rationale text are hardcoded and identical for every company; only the
-*correct answer* is filled in dynamically from that company's actual
-`topRulesToRemember[0]` / `permittedUse[0]` / `approvedTools[0]` /
-`dataToProtect[0]` / `whenUnsure[0]`. If you see exactly "Which of
-these best reflects a top rule to remember?" as question 1, you're
-looking at the fallback template, not an AI-generated quiz — that's a
-quick way to tell whether the API key is actually live.
+- Validate extracted content
+- Confirm citations
+- Resolve flagged gaps
+- Add organization-specific clarifications
 
-### Step 5: Branding & employee PDF
+### Step 4: Generate Knowledge Check
 
-`resolveOrgBranding()` (in `MobilizationContext.tsx`) infers the company
-name and policy title when you don't type them explicitly: it tries the
-explicit form input first, then pattern-matches the document text itself
-(`extractCompanyNameFromText`/`extractPolicyTitleFromText` in
-`lib/types/org-branding.ts`), then falls back to guessing from the uploaded
-filename. A filename-derived guess sets `orgNameNeedsReview = true`,
-which shows a warning banner on the PDF preview — a heading actually
-found in the document is trusted; a filename guess is flagged for a
-human to confirm before it goes out on a client-facing PDF.
+The toolkit creates a 5-question AI Knowledge Check aligned to the
+policy, matching the real BSI platform's fixed format.
 
-`buildEmployeePdfDocument()` (`build-pdf-document.ts`) turns the 6
-sections into a cover slide + one slide per section (fixed left-column
-copy per section from `section-left-copy.ts`, right column = that
-section's actual bullets), themed with the branding colors
-(`lib/pdf/build-theme.ts`). `PdfPreviewContent.tsx` renders this at a fixed
-1600×900px off-screen node and exports it via `html2pdf.js`
-(html2canvas + jsPDF under the hood) sized to match exactly — this is
-why "Download PDF" triggers a same-tab file save via `html2pdf.js`,
-while the flow on step 6 instead opens `/pdf-preview` in a new tab for
-a manual Print → Save as PDF (kept as a reliability fallback since
-`html2pdf.js`'s canvas rendering can be finicky with complex CSS).
+When AI is available, Claude picks the 5 most important, most testable
+concepts from across all six sections (favoring content where a wrong
+answer could cause real harm), each with a verified verbatim source
+quote and exactly 4 answer options (1 correct, 3 plausible distractors).
 
-### Step 6: Downloads
+If AI is unavailable, a predefined question template is used instead —
+the prompts, wrong answers, and rationale text are identical for every
+company, with only the correct answer filled in dynamically from that
+company's actual parsed content. (If question 1 reads exactly "Which of
+these best reflects a top rule to remember?", that's the fallback
+template, not an AI-generated quiz.)
 
-`DownloadsPanel.tsx` exposes the 3 assets described above. Before
-allowing the Excel download it also runs `validateFlowBuilderWorkbook()`
-and `getFlowBuilderFlags()` — surfaced as inline warnings/errors in the
-panel — so a broken or incomplete export can't silently go out.
+### Step 5: Generate employee PDF
 
-### Step 7: Flow Builder Excel export
+The employee guide is generated from the six parsed sections and
+organization branding — company name, policy title, and colors, either
+typed in explicitly or inferred from the document/filename (a
+filename-derived guess is flagged for human confirmation before it goes
+out on a client-facing PDF).
 
-`generateMobilizationFlow()` (`generate-flow.ts`) assembles a **fixed
-7-step flow** (welcome video → baseline survey → employee PDF → official
-AUP → assessment → exit survey → acknowledgment) — the step
-titles/descriptions are templated with the org name, but the flow
-*shape* itself never changes company to company. The asset titles match
-the real BSI platform's naming convention exactly (verified against a
-live client flow) — see the comment above `buildFlowSteps()` before
-changing any of them, since the platform resolves `Existing` assets by
-title text when no Asset ID is given.
+The output is a branded PDF reference guide intended for employee
+consumption and Flow Builder deployment. "Download PDF" opens a preview
+in a new tab for a manual Print → Save as PDF, rather than an automatic
+browser download — see Known quirks below.
 
-The baseline survey (`buildBaselineSurvey()`) and outcomes survey
-(`buildOutcomesSurvey()`) are likewise **fixed, verbatim content** — the
-same 2 questions every time, with only the organization name
-substituted into the question text itself (not just the asset title).
-This isn't a template the app fills in from the parsed policy; it's the
-same 2-question baseline/outcomes pair the platform already uses for
-every client, reproduced exactly so re-generating a flow doesn't drift
-from what's already live. Only the AI Knowledge Check (the assessment)
-varies its content per policy — see Step 4 above.
+### Step 6: Generate deployment assets
 
-`buildFlowBuilderWorkbook()`
-(`build-flow-builder-excel.ts`) turns that into a 3-sheet `.xlsx`
-(via `exceljs`): a **Flow** sheet (title/description), an **Items**
-sheet (one row per flow step, marked `New` or `Existing`), and a
-**Questions** sheet (every survey/assessment/acknowledgment question
-flattened into rows with lettered options).
+The toolkit produces three deployment assets:
+
+| Asset | Purpose |
+|-------|---------|
+| Official AI Acceptable Use Policy | Original source document |
+| Employee Quick Reference PDF | Employee learning asset |
+| Flow Builder Excel Workbook | Platform import package |
+
+Before allowing the Excel download, the toolkit validates the generated
+workbook so a broken or incomplete export can't silently go out (see
+Export validation below).
+
+### Step 7: Build Flow Builder package
+
+The toolkit automatically assembles a standardized 7-step learning
+experience:
+
+1. Why an AI Acceptable Use Policy Matters
+2. AI Baseline Survey
+3. Employee Quick Reference Guide
+4. Official AI Acceptable Use Policy
+5. AI Knowledge Check
+6. AI Outcomes Survey
+7. Policy Review & Acknowledgment
+
+The flow structure remains consistent across customers — asset titles
+match the real BSI platform's naming convention exactly, since the
+platform resolves "Existing" assets by title text when no Asset ID is
+given — while policy-specific content (the six sections and the
+Knowledge Check) is dynamically generated per client.
 
 One detail worth knowing: the employee PDF and official AUP items start
-as `New` on first export, but once you've uploaded them to the BSI
+as "New" on first export, but once you've uploaded them to the BSI
 platform once, that asset gets a real platform ID — re-running the
-export without recording that ID (`pdfAssetOverrides` in
-`FlowBuilderExportPanel`) will tell the platform to create a duplicate
-asset instead of reusing the one already uploaded.
+export without recording that ID (in the Flow Builder assets step) will
+tell the platform to create a duplicate asset instead of reusing the one
+already uploaded.
+
+### Export validation
+
+Before download, the toolkit validates the generated workbook against
+the BSI Flow Builder format and surfaces issues that could cause import
+failures — for example, mismatched Asset Titles between sheets, blank
+answer options, or the wrong number of options for a question type
+(exactly 4 for assessment questions, exactly 2 for acknowledgment).
+
+The generated workbook contains three sheets:
+
+- **Flow** — flow metadata (title/description)
+- **Items** — asset definitions, one row per flow step
+- **Questions** — survey and assessment content, flattened into rows
+  with lettered options
 
 ### QA'ing the Excel export against the platform spec
 
