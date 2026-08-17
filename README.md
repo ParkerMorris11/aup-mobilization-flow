@@ -1,11 +1,10 @@
-# AUP Mobilization Flow v2
+# AUP Toolkit
 
-Turn a company AI Acceptable Use Policy into parsed employee sections, a branded PDF deck, and a Flow Builder Excel export for BSI platform upload.
+Turn any company AI Acceptable Use Policy into a structured employee learning experience, complete with seven assets, a branded PDF guide, and a Flow Builder Excel file ready for upload to the BSI platform. 
 
-Next.js 15 / React 19 / TypeScript app. No backend database — all session
-state lives in the browser (`sessionStorage`, key `aup-mobilization-state-v4`)
-plus IndexedDB for large uploaded files. There is nothing to deploy besides
-the Next.js app itself.
+
+
+
 
 ## Quick start
 
@@ -22,7 +21,7 @@ Then open `.env.local` and set your Anthropic API key:
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Get a key from the [Anthropic Console](https://console.anthropic.com/).
+Get a key from Adam Black or [Anthropic Console](https://console.anthropic.com/). 
 Never commit a real key — `.env*` is gitignored except `.env.example`.
 
 ```bash
@@ -124,6 +123,11 @@ This section explains the actual mechanics behind each step — what code
 runs, what it does when the AI path is unavailable, and how data flows
 between pieces. Everything below is state that lives entirely in the
 browser; there is no database and no server-side session.
+
+Next.js 15 / React 19 / TypeScript app. No backend database — all session
+state lives in the browser (`sessionStorage`, key `aup-mobilization-state-v4`)
+plus IndexedDB for large uploaded files. There is nothing to deploy besides
+the Next.js app itself.
 
 ### State & persistence
 
@@ -420,21 +424,7 @@ npm run lint
 npm run build   # Also the closest thing to a full type-check
 ```
 
-Test coverage is thin — the parse/PDF/Excel export pipeline itself is not
-covered by automated tests. Before relying on a change, walk the golden
-path manually: Upload (or "Load sample AUP") → Parse → Edit sections →
-Review assessment → Branding/PDF → Download & export → Flow builder assets.
 
 ## Known quirks
 
-- On first paint there's a brief window where React hasn't finished
-  hydrating the upload form yet; clicking a button in that instant (rare
-  for a human, easy to hit with an automated script) does nothing. Not a
-  functional bug — no action needed for normal use.
-- "Download PDF" opens `/pdf-preview` in a new tab rather than triggering
-  a browser download — the user finishes it with Print → Save as PDF.
-  This is intentional (see `openEmployeePdfDownloadPreview` in
-  `src/lib/services/download-assets.ts`), not a missing feature.
-- `/admin` duplicates most of the home-page wizard as a tabbed view over
-  the same shared state. Worth deciding whether to keep both entry points
-  or consolidate before long-term maintenance.
+
