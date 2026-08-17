@@ -13,8 +13,7 @@ export const assessmentQuestionSchema = z.object({
   prompt: z.string().describe("A knowledge-check question testing comprehension of one specific AUP bullet"),
   options: z
     .array(z.string())
-    .min(3)
-    .max(4)
+    .length(4)
     .describe("Answer choices — one correct, the rest plausible same-topic distractors"),
   correctAnswer: z
     .string()

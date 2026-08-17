@@ -384,7 +384,11 @@ function addQuestionsSheet(
   applyHeaderRow(header);
 
   questions.forEach((question) => {
-    const optionCells = optionHeaders.map((_, index) => question.options[index] ?? "");
+    // Leave option cells beyond this question's own answers with no value at
+    // all (not ""), so a wider question elsewhere in the sheet (e.g. the
+    // 5-option confidence scale) doesn't leave Flow Builder rendering a real,
+    // empty answer slot for questions that only have 4 options.
+    const optionCells = optionHeaders.map((_, index) => question.options[index]);
     const row = sheet.addRow([
       question.assetTitle,
       question.questionNumber,

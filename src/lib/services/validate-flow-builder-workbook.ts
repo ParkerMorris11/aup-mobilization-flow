@@ -40,9 +40,10 @@ export function validateFlowBuilderWorkbook(
     }
   }
 
-  const itemTitles = new Set(items.map((item) => item.title));
+  const itemByTitle = new Map(items.map((item) => [item.title, item]));
   for (const question of questions) {
-    if (!itemTitles.has(question.assetTitle)) {
+    const item = itemByTitle.get(question.assetTitle);
+    if (!item) {
       errors.push(
         `Question "${question.questionText}" has Asset Title "${question.assetTitle}", which doesn't match any Items row — this question will be orphaned.`
       );
@@ -53,6 +54,33 @@ export function validateFlowBuilderWorkbook(
     if (isAssessmentChoice && !question.correct) {
       warnings.push(
         `Assessment question "${question.questionText}" has no Correct answer marked — it has no way to be scored.`
+      );
+    }
+
+    const isChoiceType =
+      isAssessmentChoice ||
+      question.type === "single-select" ||
+      question.type === "multi-select";
+    const filledOptions = question.options.filter((option) => option.trim() !== "");
+    const label = question.questionText || "(untitled question)";
+
+    if (isChoiceType && filledOptions.length !== question.options.length) {
+      errors.push(
+        `Question "${label}" on "${question.assetTitle}" has blank answer option(s) — Flow Builder won't publish the asset until every option is filled in or removed.`
+      );
+    }
+
+    const isAssessmentQuestion = item?.labels?.includes("assessment");
+    if (isAssessmentQuestion && filledOptions.length !== 4) {
+      errors.push(
+        `Assessment question "${label}" has ${filledOptions.length} answer option(s) — assessment questions must have exactly 4.`
+      );
+    }
+
+    const isAcknowledgment = item?.labels?.includes("acknowledgment");
+    if (isAcknowledgment && filledOptions.length !== 2) {
+      errors.push(
+        `Acknowledgment question "${label}" has ${filledOptions.length} answer option(s) — it must have exactly 2 ("I Acknowledge" / "I Do Not Acknowledge").`
       );
     }
   }

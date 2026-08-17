@@ -75,7 +75,7 @@ Write exactly 5 multiple-choice questions total — this is a short knowledge ch
 
 Each question must:
 - Test comprehension of ONE specific bullet — not a vague generality.
-- Have 3-4 answer options: one correct, and 2-3 plausible-but-wrong distractors that relate to the SAME section/topic (not obviously unrelated or silly), so the question actually tests understanding rather than obvious elimination.
+- Have exactly 4 answer options: one correct, and 3 plausible-but-wrong distractors that relate to the SAME section/topic (not obviously unrelated or silly), so the question actually tests understanding rather than obvious elimination.
 - correctAnswer must be an exact string match of one of the options.
 - sourceQuote must be an exact verbatim substring copied from the bullet(s) of that section above — do not paraphrase it.
 - rationale is one sentence explaining why the correct answer is right, suitable to show the employee after they answer.

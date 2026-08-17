@@ -11,7 +11,7 @@ function blankQuestion(index: number): AssessmentQuestion {
   return {
     id: `assessment-custom-${index}`,
     prompt: "",
-    options: ["", "", ""],
+    options: ["", "", "", ""],
     correctAnswer: "",
     rationale: "",
   };
@@ -50,26 +50,6 @@ export function AssessmentReviewPanel({
         const correctAnswer =
           q.correctAnswer === q.options[oIndex] ? value : q.correctAnswer;
         return { ...q, options, correctAnswer };
-      })
-    );
-  };
-
-  const addOption = (qIndex: number) => {
-    setDraft((current) =>
-      current.map((q, i) => (i === qIndex ? { ...q, options: [...q.options, ""] } : q))
-    );
-  };
-
-  const removeOption = (qIndex: number, oIndex: number) => {
-    setDraft((current) =>
-      current.map((q, i) => {
-        if (i !== qIndex) return q;
-        const removed = q.options[oIndex];
-        return {
-          ...q,
-          options: q.options.filter((_, j) => j !== oIndex),
-          correctAnswer: q.correctAnswer === removed ? "" : q.correctAnswer,
-        };
       })
     );
   };
@@ -190,26 +170,8 @@ export function AssessmentReviewPanel({
                   placeholder={`Option ${oIndex + 1}`}
                   className="w-full rounded-card border border-alpine/15 bg-white px-3 py-1.5 text-sm text-alpine placeholder:text-alpine/40 focus:border-alpine/40 focus:outline-none focus:ring-2 focus:ring-alpine/10"
                 />
-                {question.options.length > 2 && (
-                  <button
-                    type="button"
-                    onClick={() => removeOption(qIndex, oIndex)}
-                    title="Remove option"
-                    className="shrink-0 rounded-full p-1 text-alpine/30 hover:bg-red-50 hover:text-red-600"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
               </div>
             ))}
-            <button
-              type="button"
-              onClick={() => addOption(qIndex)}
-              className="flex items-center gap-1 text-xs font-medium text-alpine/60 hover:text-alpine"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add option
-            </button>
           </div>
 
           <textarea

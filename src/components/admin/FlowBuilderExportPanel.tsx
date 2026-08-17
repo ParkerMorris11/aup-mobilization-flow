@@ -29,13 +29,17 @@ function blankItem(): FlowBuilderItem {
   return { title: "", type: "Survey", source: "New", description: "", labels: "" };
 }
 
-function blankQuestion(assetTitle: string, questionNumber: number): FlowBuilderQuestion {
+function blankQuestion(
+  assetTitle: string,
+  questionNumber: number,
+  optionCount = 2
+): FlowBuilderQuestion {
   return {
     assetTitle,
     questionNumber,
     questionText: "",
     type: "single-select",
-    options: ["", ""],
+    options: Array.from({ length: optionCount }, () => ""),
     required: "No",
     branching: "No",
   };
@@ -108,6 +112,44 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
     }
   }, [generated, flowBuilderOverrides, flow]);
 
+  // The PDF/video Asset ID fields above are a separate source of truth from
+  // the Items table edits below. When one of those fields changes, push its
+  // resolved source/assetId/title/description/labels into the matching draft
+  // row in place — without re-seeding the whole table and losing unrelated
+  // manual edits made elsewhere in the preview.
+  const prevPdfAssetOverridesRef = useRef(pdfAssetOverrides);
+  useEffect(() => {
+    if (!generated) return;
+    if (prevPdfAssetOverridesRef.current === pdfAssetOverrides) return;
+    prevPdfAssetOverridesRef.current = pdfAssetOverrides;
+
+    const assetLinkedStepIds = [
+      "your-ai-policy-at-a-glance",
+      "official-company-aup",
+      "why-ai-safe-use-matters",
+    ];
+    const linkedIndices = new Set(
+      assetLinkedStepIds
+        .map((id) => flow.flowSteps.findIndex((step) => step.id === id))
+        .filter((index) => index !== -1)
+    );
+
+    setDraftItems((current) =>
+      current.map((item, index) => {
+        const authoritative = generated.items[index];
+        if (!linkedIndices.has(index) || !authoritative) return item;
+        return {
+          ...item,
+          source: authoritative.source,
+          assetId: authoritative.assetId,
+          title: authoritative.title,
+          description: authoritative.description,
+          labels: authoritative.labels,
+        };
+      })
+    );
+  }, [pdfAssetOverrides, generated, flow]);
+
   const flags = generated ? getFlowBuilderFlags(draftItems) : [];
   const validation = generated
     ? validateFlowBuilderWorkbook(draftItems, draftQuestions)
@@ -159,11 +201,12 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
 
   const addBlankQuestion = (assetTitle: string) => {
     setDraftQuestions((current) => {
-      const countInGroup = current.filter((q) => q.assetTitle === assetTitle).length;
+      const group = current.filter((q) => q.assetTitle === assetTitle);
       const lastIndex = current.map((q) => q.assetTitle).lastIndexOf(assetTitle);
       const insertAt = lastIndex === -1 ? current.length : lastIndex + 1;
+      const optionCount = group.at(-1)?.options.length ?? 2;
       const next = [...current];
-      next.splice(insertAt, 0, blankQuestion(assetTitle, countInGroup + 1));
+      next.splice(insertAt, 0, blankQuestion(assetTitle, group.length + 1, optionCount));
       return next;
     });
   };
