@@ -97,13 +97,24 @@ export function BrandingPanel() {
               <label className="block text-sm">
                 <span className="font-medium text-alpine">Policy version</span>
                 <input
-                  className="mt-1 w-full rounded-lg border border-alpine/15 px-3 py-2"
+                  className="mt-1 w-full rounded-lg border border-alpine/15 px-3 py-2 disabled:opacity-50"
                   placeholder="e.g. 1.0, 2.3, March 2026 Rev B"
-                  value={draft.policyVersion}
+                  disabled={!draft.showPolicyVersion}
+                  value={draft.policyVersion ?? ""}
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, policyVersion: e.target.value }))
                   }
                 />
+                <label className="mt-2 flex items-center gap-2 text-xs text-alpine/60">
+                  <input
+                    type="checkbox"
+                    checked={draft.showPolicyVersion}
+                    onChange={(e) =>
+                      setDraft((d) => ({ ...d, showPolicyVersion: e.target.checked }))
+                    }
+                  />
+                  Show policy version on cover slide
+                </label>
               </label>
               <label className="block text-sm">
                 <span className="font-medium text-alpine">Effective date</span>

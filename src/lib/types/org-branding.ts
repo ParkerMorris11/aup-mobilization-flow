@@ -6,6 +6,8 @@ export interface OrgBranding {
   accentColor: string;
   policyTitle: string;
   policyVersion: string;
+  /** Whether to show the policy version on the cover slide */
+  showPolicyVersion: boolean;
   effectiveDate: string;
   /** Whether the cover slide shows "Effective {date}" next to the version — off when the date isn't finalized yet */
   showEffectiveDate: boolean;
@@ -18,6 +20,7 @@ export const DEFAULT_ORG_BRANDING: OrgBranding = {
   accentColor: "#e3d24a",
   policyTitle: "AI Acceptable Use Policy Summary",
   policyVersion: "1.0",
+  showPolicyVersion: true,
   effectiveDate: "January 1, 2026",
   showEffectiveDate: true,
   // "{organizationName}" is substituted with the real org name when the PDF is built

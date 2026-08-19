@@ -36,6 +36,8 @@ export function buildEmployeePdfDocument(
     options.effectiveDate ??
     options.branding?.effectiveDate ??
     "January 1, 2026";
+  const showPolicyVersion =
+    (options.branding?.showPolicyVersion ?? true) && policyVersion.trim().length > 0;
   const showEffectiveDate =
     (options.branding?.showEffectiveDate ?? true) && effectiveDate.trim().length > 0;
   const coverTaglineTemplate =
@@ -69,9 +71,13 @@ export function buildEmployeePdfDocument(
       EMPLOYEE_SECTION_LABELS.accountability,
       EMPLOYEE_SECTION_LABELS.whenUnsure,
     ],
-    footer: showEffectiveDate
+    footer: showPolicyVersion && showEffectiveDate
       ? `Policy v${policyVersion} · ${effectiveDate}`
-      : `Policy v${policyVersion}`,
+      : showPolicyVersion
+        ? `Policy v${policyVersion}`
+        : showEffectiveDate
+          ? effectiveDate
+          : "",
   });
 
   const sectionSlides: Omit<EmployeePdfSlide, "pageNumber">[] =
