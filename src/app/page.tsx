@@ -22,7 +22,7 @@ const STEPS: WizardStepMeta[] = [
   { id: 4, title: "Review assessment", description: "See and edit AI-generated quiz questions" },
   { id: 5, title: "Generate employee AUP", description: "Formatted PDF with left/right layout" },
   { id: 6, title: "Download & export", description: "AUP files + Excel spreadsheet" },
-  { id: 7, title: "Flow builder assets", description: "6-asset sequence for the platform" },
+  { id: 7, title: "Flow builder assets", description: "7-asset sequence for the platform" },
 ];
 
 export default function Home() {
