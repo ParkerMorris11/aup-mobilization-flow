@@ -49,7 +49,7 @@ export function buildBsiUploadChecklist() {
   return [
     "Download and upload the Official Company AUP PDF to the BSI platform.",
     "Download the Employee AUP PDF and upload it to the BSI platform.",
-    "Download the Flow Builder Excel workbook and upload it to Flow Builder.",
+    "Copy each asset's platform Asset ID into the Flow Builder Excel workbook on the next step.",
     "Confirm the Existing intro video title matches your platform asset.",
     "Enter the Pack ID in Flow Builder Setup if this flow belongs to a pack.",
   ];

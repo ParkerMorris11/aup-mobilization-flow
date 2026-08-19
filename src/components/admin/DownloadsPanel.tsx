@@ -1,51 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import {
-  CheckCircle2,
-  Download,
-  ExternalLink,
-  FileSpreadsheet,
-  FileText,
-  Printer,
-} from "lucide-react";
+import { CheckCircle2, Download, ExternalLink, FileText, Printer } from "lucide-react";
 import { Button, Card, SectionTitle } from "@/components/ui";
 import { useMobilization } from "@/context/MobilizationContext";
 import {
   buildBsiUploadChecklist,
-  downloadFlowBuilderSpreadsheet,
   downloadOriginalAup,
   openEmployeePdfDownloadPreview,
   getAssetReadiness,
 } from "@/lib/services/download-assets";
-import {
-  buildFlowBuilderWorkbook,
-  flowBuilderFileName,
-  getFlowBuilderFlags,
-} from "@/lib/services/build-flow-builder-excel";
-import { validateFlowBuilderWorkbook } from "@/lib/services/validate-flow-builder-workbook";
-
-const FLOW_BUILDER_APP_URL = "https://lx-flowbuilder-app.azurewebsites.net/";
 
 export function DownloadsPanel() {
-  const { uploadedAup, sections, flow, orgBranding, pdfAssetOverrides, flowBuilderOverrides } =
-    useMobilization();
+  const { uploadedAup, sections, flow } = useMobilization();
   const [downloading, setDownloading] = useState<string | null>(null);
-  const [flags, setFlags] = useState<string[]>([]);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const readiness = getAssetReadiness(uploadedAup, sections, flow);
   const checklist = buildBsiUploadChecklist();
-
-  useEffect(() => {
-    if (!flow) return;
-    void buildFlowBuilderWorkbook(flow, pdfAssetOverrides, flowBuilderOverrides ?? undefined).then(
-      ({ items, questions }) => {
-        setFlags(getFlowBuilderFlags(items));
-        setValidationErrors(validateFlowBuilderWorkbook(items, questions).errors);
-      }
-    );
-  }, [flow, pdfAssetOverrides, flowBuilderOverrides]);
 
   async function handleDownload(
     key: string,
@@ -69,25 +40,23 @@ export function DownloadsPanel() {
     );
   }
 
-  const excelFileName = flowBuilderFileName(orgBranding.organizationName);
-
   return (
     <div className="space-y-6">
       <Card>
-        <SectionTitle className="text-xl">Download assets (v2)</SectionTitle>
+        <SectionTitle className="text-xl">Download assets</SectionTitle>
         <p className="mt-2 text-sm text-alpine/60">
-          Download everything you need for the BSI platform: the original company
-          AUP, the employee PDF deck, and the Flow Builder Excel workbook.
+          Download the two assets you&apos;ll upload to the BSI platform: the
+          original company AUP and the employee PDF deck.
         </p>
-        {readiness.allReady && (
+        {readiness.originalAup && readiness.employeePdf && (
           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
             <CheckCircle2 className="h-4 w-4" />
-            All assets ready
+            Both assets ready
           </div>
         )}
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card className="flex flex-col">
           <div className="flex items-center gap-2 text-alpine">
             <FileText className="h-5 w-5 text-alpine/50" />
@@ -98,7 +67,7 @@ export function DownloadsPanel() {
           </p>
           <p className="mt-2 text-xs text-alpine/50">{uploadedAup.fileName}</p>
           <Button
-            className="mt-4"
+            className="mt-4 w-full justify-center"
             onClick={() =>
               handleDownload("original", () => downloadOriginalAup(uploadedAup))
             }
@@ -117,64 +86,22 @@ export function DownloadsPanel() {
           <p className="mt-2 flex-1 text-sm text-alpine/60">
             Branded slide deck built from parsed sections.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <p className="mt-2 text-xs text-alpine/50">&nbsp;</p>
+          <div className="mt-4 flex gap-2">
             <Button
+              className="flex-1 justify-center"
               onClick={() => openEmployeePdfDownloadPreview()}
             >
               <Download className="h-4 w-4" />
               Download PDF
             </Button>
             <Link href="/pdf-preview">
-              <Button variant="secondary">
+              <Button variant="secondary" className="justify-center">
                 <ExternalLink className="h-4 w-4" />
                 Full preview
               </Button>
             </Link>
           </div>
-        </Card>
-
-        <Card className="flex flex-col">
-          <div className="flex items-center gap-2 text-alpine">
-            <FileSpreadsheet className="h-5 w-5 text-alpine/50" />
-            <h4 className="font-medium">Flow Builder Excel</h4>
-          </div>
-          <p className="mt-2 flex-1 text-sm text-alpine/60">
-            3-sheet workbook for the Flow Builder tool with all 7 mobilization
-            assets.
-          </p>
-          <p className="mt-2 font-mono text-xs text-alpine/50">{excelFileName}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              onClick={() =>
-                handleDownload("excel", () =>
-                  downloadFlowBuilderSpreadsheet(
-                    flow,
-                    pdfAssetOverrides,
-                    flowBuilderOverrides ?? undefined
-                  )
-                )
-              }
-              disabled={downloading === "excel" || validationErrors.length > 0}
-            >
-              <Download className="h-4 w-4" />
-              {downloading === "excel" ? "Generating..." : "Download Excel"}
-            </Button>
-            <a
-              href={FLOW_BUILDER_APP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="secondary" disabled={validationErrors.length > 0}>
-                <ExternalLink className="h-4 w-4" />
-                Open Flow Builder to upload
-              </Button>
-            </a>
-          </div>
-          {validationErrors.length > 0 && (
-            <p className="mt-2 text-xs text-red-600">
-              Fix the issues below in the Flow Builder export tab before downloading.
-            </p>
-          )}
         </Card>
       </div>
 
@@ -186,30 +113,6 @@ export function DownloadsPanel() {
           ))}
         </ol>
       </Card>
-
-      {validationErrors.length > 0 && (
-        <Card className="border-red-300 bg-red-50">
-          <h4 className="text-sm font-semibold text-alpine">
-            Fix before downloading the Excel workbook
-          </h4>
-          <ul className="mt-3 space-y-2 text-sm text-alpine/80">
-            {validationErrors.map((error) => (
-              <li key={error}>{error}</li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {flags.length > 0 && (
-        <Card className="bg-amber-50/60">
-          <h4 className="text-sm font-semibold text-alpine">Review before upload</h4>
-          <ul className="mt-3 space-y-2 text-sm text-alpine/80">
-            {flags.map((flag) => (
-              <li key={flag}>{flag}</li>
-            ))}
-          </ul>
-        </Card>
-      )}
     </div>
   );
 }

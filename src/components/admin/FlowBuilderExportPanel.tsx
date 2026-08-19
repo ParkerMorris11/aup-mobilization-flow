@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ExternalLink, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, Download, ExternalLink, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button, Card, SectionTitle } from "@/components/ui";
 import { useMobilization } from "@/context/MobilizationContext";
+import { downloadFlowBuilderSpreadsheet } from "@/lib/services/download-assets";
 
 const FLOW_BUILDER_APP_URL = "https://lx-flowbuilder-app.azurewebsites.net/";
 import {
@@ -69,6 +70,7 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
   const [draftQuestions, setDraftQuestions] = useState<FlowBuilderQuestion[]>([]);
   const [generatingItem, setGeneratingItem] = useState(false);
   const [generatingGroup, setGeneratingGroup] = useState<string | null>(null);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -240,6 +242,15 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
     updateFlowBuilderOverrides(draftItems, draftQuestions);
   };
 
+  const handleDownloadExcel = async () => {
+    setDownloadingExcel(true);
+    try {
+      await downloadFlowBuilderSpreadsheet(flow, pdfAssetOverrides, flowBuilderOverrides ?? undefined);
+    } finally {
+      setDownloadingExcel(false);
+    }
+  };
+
   const questionGroups = draftQuestions.reduce<{ assetTitle: string; rows: { question: FlowBuilderQuestion; index: number }[] }[]>(
     (groups, question, index) => {
       const lastGroup = groups[groups.length - 1];
@@ -324,20 +335,27 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => void handleDownloadExcel()}
+              disabled={downloadingExcel || !generated || validation.errors.length > 0}
+            >
+              <Download className="h-4 w-4" />
+              {downloadingExcel ? "Generating..." : "Download Excel"}
+            </Button>
             <a
               href={FLOW_BUILDER_APP_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button variant="secondary">
+              <Button variant="secondary" disabled={validation.errors.length > 0}>
                 <ExternalLink className="h-4 w-4" />
-                Open Flow Builder
+                Open Flow Builder to upload
               </Button>
             </a>
             <Link href="/admin?tab=downloads">
               <Button variant="secondary">
                 <ExternalLink className="h-4 w-4" />
-                Go to downloads
+                Back to downloads
               </Button>
             </Link>
           </div>
@@ -345,6 +363,11 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
         <p className="mt-4 text-xs text-alpine/50">
           File: <span className="font-mono">{fileName}</span>
         </p>
+        {validation.errors.length > 0 && (
+          <p className="mt-2 text-xs text-red-600">
+            Fix the issues below before downloading the workbook.
+          </p>
+        )}
       </Card>
 
       {generated && (

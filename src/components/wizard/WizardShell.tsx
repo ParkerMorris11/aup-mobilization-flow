@@ -151,7 +151,7 @@ export function WizardShell({
           </div>
         </header>
 
-        <main className="mx-auto max-w-5xl px-8 py-10">{children}</main>
+        <main className="mx-auto max-w-none px-8 py-10 xl:px-12">{children}</main>
       </div>
     </div>
   );
