@@ -352,6 +352,16 @@ export function FlowBuilderExportPanel({ flow }: { flow: MobilizationFlow }) {
                 Open Flow Builder to upload
               </Button>
             </a>
+            <a
+              href="https://app.brainstorminc.com/home"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="secondary">
+                <ExternalLink className="h-4 w-4" />
+                Go to platform
+              </Button>
+            </a>
             <Link href="/admin?tab=downloads">
               <Button variant="secondary">
                 <ExternalLink className="h-4 w-4" />

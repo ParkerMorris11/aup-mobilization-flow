@@ -43,11 +43,21 @@ export function DownloadsPanel() {
   return (
     <div className="space-y-6">
       <Card>
-        <SectionTitle className="text-xl">Download assets</SectionTitle>
-        <p className="mt-2 text-sm text-alpine/60">
-          Download the two assets you&apos;ll upload to the BSI platform: the
-          original company AUP and the employee PDF deck.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <SectionTitle className="text-xl">Download assets</SectionTitle>
+            <p className="mt-2 text-sm text-alpine/60">
+              Download the two assets you&apos;ll upload to the BSI platform: the
+              original company AUP and the employee PDF deck.
+            </p>
+          </div>
+          <Link href="https://app.brainstorminc.com/home" target="_blank">
+            <Button variant="secondary" className="justify-center">
+              <ExternalLink className="h-4 w-4" />
+              Go to platform
+            </Button>
+          </Link>
+        </div>
         {readiness.originalAup && readiness.employeePdf && (
           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
             <CheckCircle2 className="h-4 w-4" />
